@@ -12,6 +12,6 @@
   "dependencies": {},
   "copyright": "Copyright © 2025, ew",
   "preBuildCommands": [
-    "cd libstemmer/src && make -j2 clean libstemmer.a"
+    "cd libstemmer/src && make clean && make -j2 libstemmer.a"
   ]
 }
