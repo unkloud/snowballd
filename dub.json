@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"ew"
+	],
+	"copyright": "Copyright © 2025, ew",
+	"description": "A wrapper of snowball stemmer",
+	"license": "AGPL-3.0-or-later",
+	"name": "snowballd"
+}

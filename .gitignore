@@ -1,0 +1,42 @@
+.idea/
+.dub
+docs.json
+__dummy.html
+docs/
+/snowballd
+snowballd.so
+snowballd.dylib
+snowballd.dll
+snowballd.a
+snowballd.lib
+snowballd-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst
+
+# Compiled Object files
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+
+# Executables
+*.exe
+
+# DUB
+.dub
+docs.json
+__dummy.html
+docs/
+
+# Code coverage
+*.lst
