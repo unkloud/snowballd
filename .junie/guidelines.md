@@ -15,6 +15,12 @@ Project-specific guidelines for snowballd
 
 ## For D projects:
 
+- DO NOT INSTALL ANY SYSTEM COMPONENTS
+- To activate D compiler system
+    - source /home/ew/dlang/dmd-2.111.0/activate
+    - source /home/ew/dlang/gdc-4.8.5/activate
+    - source /home/ew/dlang/ldc-1.41.0/activate
+- To deactivate D compiler system, run deactivate command from shell
 - Follow D's best practices
 - Update design.md each time the D code is updated, review the components and briefly explain the design and the
   reasoning behind it each part of the project
