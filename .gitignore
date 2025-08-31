@@ -40,3 +40,4 @@ docs/
 
 # Code coverage
 *.lst
+source/snowballd/libversion.d

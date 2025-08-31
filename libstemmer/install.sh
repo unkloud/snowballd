@@ -60,6 +60,7 @@ main() {
 
   rm -rf "${workdir}"
   if [[ -d "${BUILD_DIR}" ]] && [[ -z "$(ls -A "${BUILD_DIR}")" ]]; then rmdir "${BUILD_DIR}"; fi
+  echo $version>.version
 }
 
 main "$@"

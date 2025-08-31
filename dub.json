@@ -1,6 +1,7 @@
 {
   "name": "snowballd",
   "description": "A D library: bindings/wrapper for the Snowball libstemmer",
+  "version": "3.0.1",
   "authors": [
     "ew"
   ],
@@ -12,6 +13,7 @@
   "dependencies": {},
   "copyright": "Copyright © 2025, ew",
   "preBuildCommands": [
-    "cd libstemmer/src && make clean && make -j2 libstemmer.a"
+    "cd libstemmer/src && make clean && make -j2 libstemmer.a",
+    "./generate_version.sh"
   ]
 }

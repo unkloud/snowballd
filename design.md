@@ -1,81 +1,149 @@
-# Design
+# Design Document
 
-Goal: Provide a simple D library that exposes Snowball libstemmer functionality.
+**Note: This project was created with the help of an AI coding agent.**
+
+## Goal
+
+Provide a simple, safe, and idiomatic D library that exposes Snowball libstemmer functionality for text stemming operations.
+
+## Architecture Overview
+
+The library provides two levels of API:
+
+1. **High-level D wrapper** (`Stemmer` struct) - Recommended for most users
+2. **Low-level C bindings** - For advanced users needing direct control
 
 ## Components
 
 ### High-Level D Wrapper (`Stemmer` struct)
 
-- **RAII for Memory Management**: The `Stemmer` struct manages the `sb_stemmer` lifecycle automatically via its
-  constructor and destructor with proper @nogc and nothrow attributes.
-- **Idiomatic D Interface**: Works directly with D's `string` type for input and output using `in` parameters for
-  immutable string inputs and proper const correctness.
-- **Error Handling**: Uses `std.exception.enforce` for idiomatic D error handling instead of manual null checks.
-- **Resource Safety**: Copy constructor is disabled (@disable this(this)) to prevent double-free issues.
-- **Static Utility**: Provides a static method `availableAlgorithms()` marked @trusted to safely interface with C code.
-- **Memory Safety**: Uses .dup to ensure returned strings are owned by D's garbage collector, not C memory.
+This is the recommended interface for D developers. It provides safety and convenience:
 
-### D Interface Layer (snowballd.d)
+- **RAII for Memory Management**: 
+  - *What it means*: Resources are automatically cleaned up when the `Stemmer` goes out of scope
+  - *Implementation*: The `Stemmer` struct manages the `sb_stemmer` lifecycle automatically via its constructor and destructor
+  - *D Features*: Uses `@nogc` and `nothrow` attributes for performance-critical destructors
 
-- **Opaque Types**: `sb_stemmer` struct for stemmer handles
-- **Type Aliases**: `sb_symbol` mapped to D's `ubyte` (equivalent to C's `unsigned char`)
-- **C Function Bindings**: Direct extern(C) declarations for all libstemmer functions:
+- **Idiomatic D Interface**: 
+  - *What it means*: Works naturally with D's type system and conventions
+  - *Implementation*: Accepts and returns D's `string` type, uses `in` parameters for immutable inputs
+  - *D Features*: Leverages D's const correctness and string handling
+
+- **Error Handling**: 
+  - *What it means*: Failed operations throw exceptions instead of returning null pointers
+  - *Implementation*: Uses `std.exception.enforce` for clean error handling
+  - *D Features*: Integrates with D's exception system rather than C-style error codes
+
+- **Resource Safety**: 
+  - *What it means*: Prevents common memory bugs like double-free errors
+  - *Implementation*: Copy constructor is disabled (`@disable this(this)`)
+  - *D Features*: Uses D's disable mechanism to prevent dangerous operations
+
+- **Static Utilities**: 
+  - *What it means*: Provides class-level functions that don't need an instance
+  - *Implementation*: `availableAlgorithms()` method marked `@trusted` to safely interface with C code
+  - *D Features*: Uses D's `@trusted` attribute to encapsulate unsafe C interactions
+
+- **Memory Safety**: 
+  - *What it means*: Returned strings are safe from C memory management issues
+  - *Implementation*: Uses `.dup` to copy C strings into D's garbage collector
+  - *D Features*: Leverages D's garbage collector for automatic memory management
+
+### Low-Level C Bindings
+
+For advanced users who need direct control or maximum performance:
+
+- **Opaque Types**: 
+  - *What it means*: The C library's internal structures are hidden from D code
+  - *Implementation*: `sb_stemmer` struct acts as an opaque handle
+  - *D Features*: Uses D's struct declaration without implementation details
+
+- **Type Aliases**: 
+  - *What it means*: C types are mapped to equivalent D types for compatibility
+  - *Implementation*: `sb_symbol` mapped to D's `ubyte` (equivalent to C's `unsigned char`)
+  - *D Features*: Uses D's `alias` for clean type mapping
+
+- **C Function Bindings**: 
+  - *What it means*: Direct access to the underlying C library functions
+  - *Implementation*: `extern(C)` declarations for all libstemmer functions:
     - `sb_stemmer_list()`: Returns available algorithm names
     - `sb_stemmer_new()`: Creates stemmer instances with algorithm/encoding parameters
     - `sb_stemmer_delete()`: Memory cleanup for stemmer instances
     - `sb_stemmer_stem()`: Core stemming operation on word arrays
     - `sb_stemmer_length()`: Gets result length from last stem operation
+  - *D Features*: Uses D's `extern(C)` linkage for C library integration
 
-### Design Rationale
+### Version Management (libversion.d)
 
-- **Minimal Wrapper**: Direct C bindings are provided for maximum performance and low-level control.
-- **Safe Abstraction**: A high-level `Stemmer` struct is offered for convenience, safety, and idiomatic D usage. It
-  handles resource management and provides a simpler API.
-- **Type Safety**: Uses D's const correctness and proper pointer types.
-- **Documentation**: Comprehensive function documentation with parameter details and usage notes.
-- **Memory Management**: The C-style API requires manual memory management, while the `Stemmer` wrapper handles it
-  automatically (RAII).
+- **Automatic Generation**: 
+  - *What it means*: Version information is kept in sync automatically during builds
+  - *Implementation*: The `libversion.d` file is generated during build via `generate_version.sh`
+  - *Why it matters*: Prevents version mismatches between library and wrapper
+
+- **Version Source**: 
+  - *Implementation*: Reads version from `libstemmer/.version` file (currently "3.0.1")
+  - *API Function*: Provides `libstemmerVersion()` returning the underlying libstemmer version
+
+- **Build Integration**: 
+  - *Implementation*: Version generation integrated into dub's preBuildCommands for seamless updates
+  - *Version Control*: Generated files excluded from git via `.gitignore` as they are build artifacts
+
+## Design Rationale
+
+### Why Two APIs?
+
+- **Performance vs Safety Trade-off**: 
+  - Low-level C API: Maximum performance, direct control, manual memory management
+  - High-level D wrapper: Safety, convenience, automatic resource management
+
+- **Learning Curve Consideration**:
+  - Beginners can use the safe `Stemmer` struct
+  - Experts can use direct C bindings when needed
+
+- **D Language Integration**:
+  - High-level API uses D idioms (exceptions, RAII, string types)
+  - Low-level API preserves C semantics for compatibility
+
+### Technical Decisions
+
+- **Type Safety**: Leverages D's const correctness and proper pointer types
+- **Memory Management**: RAII wrapper handles cleanup automatically, C API requires manual management
+- **Error Handling**: D exceptions vs C return codes for different user preferences
+- **Documentation**: Comprehensive function documentation with parameter details and usage examples
 
 ## Implementation Status
 
-- Project is configured as a D library via dub.json (targetType: library). ✓
-- D bindings to libstemmer/include/libstemmer.h implemented using extern(C). ✓
-- A high-level, safe D wrapper (`Stemmer` struct) is provided for automatic memory management and idiomatic usage. ✓
-- Version string function available for library identification. ✓
-- Comprehensive test suite implemented covering all library functionality. ✓
+- ✅ Project configured as a D library via dub.json (targetType: library)
+- ✅ D bindings to libstemmer implemented using extern(C)
+- ✅ High-level, safe D wrapper (`Stemmer` struct) with automatic memory management
+- ✅ Version string function available for library identification
+- ⚠️ Test suite: Currently minimal - comprehensive testing would be beneficial for future development
 
-## Testing
+## Development and Testing
 
-The project includes a comprehensive test suite in `tests/stemmer_test.d` that covers:
+### Current Status
+- The library has basic functionality implemented and working
+- Manual testing confirms core stemming operations work correctly
+- The API is stable and ready for use
 
-### Core Functionality Tests
+### Recommended Testing Areas (Future Work)
+For contributors interested in expanding the test coverage, these areas would be valuable:
 
-- **Basic Stemming**: Tests common English word stemming (running -> run, flies -> fli, etc.)
-- **Multiple Language Support**: Tests French, German, and Spanish stemming algorithms
-- **Algorithm Discovery**: Tests the `availableAlgorithms()` function to verify algorithm enumeration
-- **Porter Algorithm**: Specific tests for the classic Porter stemming algorithm
+- **Basic Functionality**: Test common word stemming across multiple languages
+- **Error Handling**: Verify proper exception handling for invalid algorithms
+- **Edge Cases**: Test with empty strings, very long words, special characters
+- **Memory Management**: Verify RAII behavior and resource cleanup
+- **Character Encoding**: Test UTF-8 and other encoding support
 
-### Error Handling and Edge Cases
+### Development Guidelines
+- Follow D best practices for memory safety and idiomatic code
+- Use `dub build` to compile the library
+- Test changes manually with simple D programs before submitting
+- Ensure new features include appropriate documentation
 
-- **Invalid Algorithm Handling**: Verifies proper exception throwing for unsupported algorithms
-- **Empty and Short Inputs**: Tests behavior with empty strings, single characters, and very short words
-- **Case Sensitivity**: Tests the library's expectation of lowercase input
-- **Long Words**: Tests stemming of very long words like "antidisestablishmentarianism"
-- **Special Characters**: Tests words with numbers, hyphens, and other non-alphabetic characters
+## Future Enhancements
 
-### Technical Tests
-
-- **Character Encoding**: Tests UTF-8 encoding support (default and explicit)
-- **Resource Management**: Verifies RAII behavior with multiple concurrent stemmers
-- **Word Pattern Recognition**: Tests various morphological patterns (plurals, past tense, gerunds)
-
-### Test Infrastructure
-
-- All tests include debug logging with `[DEBUG_LOG]` prefixes for debugging
-- Tests are organized as separate unittest blocks for clear failure isolation
-- Comprehensive assertions verify both positive and negative test cases
-
-## Future Work
-
-- Consider adding performance benchmarks for different algorithms
-- Add example usage documentation
+- **Performance Benchmarks**: Compare algorithm performance across different languages
+- **Extended Examples**: More comprehensive usage documentation with real-world scenarios  
+- **Test Suite**: Automated testing infrastructure for continuous integration
+- **Documentation**: Additional tutorials for D language newcomers

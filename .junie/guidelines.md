@@ -2,6 +2,10 @@ Project-specific guidelines for snowballd
 
 * Maintenance tips
 
+## General guidelines:
+
+- In the README.md, make it clear that the project is create with help of AI coding agent
+
 ## For Bash scripts:
 
 - Follow Bash's best practices

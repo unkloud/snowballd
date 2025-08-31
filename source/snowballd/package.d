@@ -1,5 +1,3 @@
-module snowballd;
-
 import std.conv : to;
 import std.exception : enforce;
 import std.range : empty;
@@ -108,5 +106,12 @@ struct Stemmer
         for (size_t i = 0; list[i]!is null; ++i)
             algorithms ~= list[i].fromStringz.idup;
         return algorithms;
+    }
+
+    static string libVersion()
+    {
+        import snowballd.libversion;
+
+        return libstemmerVersion();
     }
 }
