@@ -139,8 +139,13 @@ dub build
 
 ## License
 
-This project uses the same license as the underlying Snowball library.
+This project is licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). See
+the [LICENSE.txt](LICENSE.txt) file for the full license text.
 
 ## Contributing
 
-Contributions are welcome! Please ensure any changes follow D best practices and include appropriate documentation.
+Thank you for your interest in contributing to this project. It is maintained as a personal endeavor, and while
+community enthusiasm is greatly appreciated, I may not have the capacity to review pull requests in a timely manner.
+
+If you find this project useful, you are strongly encouraged to fork the repository and evolve it to suit your
+needs. Thank you for your understanding.
