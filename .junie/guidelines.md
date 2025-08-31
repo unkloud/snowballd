@@ -1,4 +1,4 @@
-Project-specific guidelines for liteup
+Project-specific guidelines for snowballd
 
 * Maintenance tips
 
