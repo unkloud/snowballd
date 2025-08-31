@@ -131,11 +131,49 @@ See the source code documentation for details.
 
 ## Building from Source
 
+### Prerequisites
+
+Before building from source, ensure you have the following command line tools installed:
+
+- **D compiler** (DMD, LDC, or GDC) and **DUB** package manager
+- **make** - For building the libstemmer library
+- **jq** - For JSON parsing in build scripts
+- **tar** - For extracting downloaded archives
+- **curl** or **wget** - For downloading libstemmer source code
+- Standard POSIX utilities: `cat`, `tr`, `sed`, `find`, `rm`, `cp`, `mkdir`
+
+#### Installation on Ubuntu/Debian:
+```bash
+sudo apt-get update
+sudo apt-get install build-essential jq curl tar
+```
+
+#### Installation on CentOS/RHEL/Fedora:
+```bash
+# For CentOS/RHEL
+sudo yum install make jq curl tar
+# For Fedora
+sudo dnf install make jq curl tar
+```
+
+#### Installation on macOS:
+```bash
+brew install jq make curl tar
+```
+
+### Building
+
 ```bash
 git clone <repository-url>
 cd snowballd
 dub build
 ```
+
+The build process will automatically:
+1. Download and extract the appropriate libstemmer source code
+2. Build the libstemmer static library
+3. Generate version information
+4. Build the D library
 
 ## License
 
