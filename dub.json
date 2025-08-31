@@ -8,5 +8,8 @@
   "targetType": "library",
   "libs": [],
   "dependencies": {},
-  "copyright": "Copyright © 2025, ew"
+  "copyright": "Copyright © 2025, ew",
+  "preBuildCommands": [
+    "cd libstemmer/src && make clean && make -j2 libstemmer.a"
+  ]
 }

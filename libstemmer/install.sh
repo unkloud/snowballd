@@ -6,8 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="${SCRIPT_DIR}/.build"
 
 usage() {
-  echo "Usage: $(basename "$0") <version>"
-  echo "  version: 3.0.0 | 3.0.1"
+  echo "Usage: $(basename "$0") [version]"
+  echo "  version: 3.0.0 | 3.0.1 (default: 3.0.1)"
   echo "Example: $(basename "$0") 3.0.1"
 }
 
@@ -19,13 +19,12 @@ die() {
 need_cmd() { command -v "$1" >/dev/null 2>&1 || die "required command '$1' not found"; }
 
 main() {
-  if [[ $# -lt 1 ]]; then usage; die "missing version argument"; fi
-  local version="$1"; shift || true
+  local version="${1:-3.0.1}"
   case "$version" in
     3.0.0|3.0.1) ;;
     *) usage; die "unsupported libstemmer version '$version'; supported versions are 3.0.0 and 3.0.1" ;;
   esac
-  local install_dir="${SCRIPT_DIR}/${version}"
+  local install_dir="${SCRIPT_DIR}/src"
 
   need_cmd tar
   local dl=""
@@ -38,7 +37,7 @@ main() {
   local workdir="${BUILD_DIR}/${version}"
   local tarball_name="libstemmer_c-${version}.tar.gz"
 
-  mkdir -p "${workdir}" "${install_dir}"
+  mkdir -p "${workdir}"
 
   rm -f "${workdir}/${tarball_name}" || true
   if [[ "$dl" == "curl" ]]; then
@@ -55,8 +54,8 @@ main() {
   src_dir="$(find "${workdir}/src" -maxdepth 1 -type d -name 'libstemmer_c-*' | head -n 1)"
   if [[ -z "${src_dir:-}" ]]; then die "source directory not found after extract"; fi
 
-  rm -rf "${install_dir:?}"/*
-  mkdir -p "${install_dir}"
+  # Clean existing installation but preserve install.sh and version subdirectories
+  find "${install_dir}" -mindepth 1 -maxdepth 1 ! -name "install.sh" ! -name "3.0.0" ! -name "3.0.1" ! -name ".build" -exec rm -rf {} +
   cp -R "${src_dir}"/* "${install_dir}/"
 
   rm -rf "${workdir}"

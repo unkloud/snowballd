@@ -7,6 +7,6 @@ Current state
 - Minimal API placeholder exists in module `snowballd` with `versionString()`. ✓
 
 Next steps (future work)
-- Add D bindings to C headers under libstemmer/*/include/libstemmer.h using `extern(C)`.
+- Add D bindings to C headers under libstemmer/include/libstemmer.h using `extern(C)`.
 - Provide safe D wrappers over the C API.
 - Add tests and examples importing the library instead of a main() program.
