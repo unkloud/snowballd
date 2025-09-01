@@ -2,213 +2,124 @@ module tests.stemmer_test;
 
 import snowballd;
 import std.exception : assertThrown, assertNotThrown;
-import std.stdio : writeln;
 
-// Test basic stemming functionality
-unittest
-{
-    writeln("[DEBUG_LOG] Testing basic English stemming");
+struct TestCase {
+    string input;
+    string expected;
+}
+
+struct LanguageTestData {
+    string language;
+    TestCase[] testCases;
+}
+
+unittest {
+    const englishTestData = [
+        TestCase("running", "run"),
+        TestCase("flies", "fli"),
+        TestCase("dogs", "dog"),
+        TestCase("churches", "church"),
+        TestCase("crying", "cri"),
+        TestCase("ugly", "ugili"),
+        TestCase("early", "earli"),
+        TestCase("happiness", "happi"),
+        TestCase("happily", "happili"),
+        TestCase("unhappy", "unhappi"),
+        TestCase("cats", "cat"),
+        TestCase("boxes", "box"),
+        TestCase("children", "children"),
+        TestCase("walked", "walk"),
+        TestCase("ran", "ran"),
+        TestCase("walking", "walk"),
+        TestCase("swimming", "swim")
+    ];
     auto stemmer = Stemmer("english");
-
-    // Test common English words
-    assert(stemmer.stem("running") == "run");
-    assert(stemmer.stem("flies") == "fli");
-    assert(stemmer.stem("dogs") == "dog");
-    assert(stemmer.stem("churches") == "church");
-    assert(stemmer.stem("crying") == "cri");
-    assert(stemmer.stem("ugly") == "ugili");
-    assert(stemmer.stem("early") == "earli");
-    writeln("[DEBUG_LOG] Basic English stemming tests passed");
-}
-
-// Test multiple language algorithms
-unittest
-{
-    writeln("[DEBUG_LOG] Testing multiple language algorithms");
-
-    // Test French stemming
-    auto frenchStemmer = Stemmer("french");
-    assert(frenchStemmer.stem("cheval") == "cheval");
-    assert(frenchStemmer.stem("chevaux") == "cheval");
-
-    // Test German stemming  
-    auto germanStemmer = Stemmer("german");
-    assert(germanStemmer.stem("laufen") == "lauf");
-
-    // Test Spanish stemming
-    auto spanishStemmer = Stemmer("spanish");
-    assert(spanishStemmer.stem("correr") == "corr");
-
-    writeln("[DEBUG_LOG] Multiple language algorithm tests passed");
-}
-
-// Test available algorithms functionality
-unittest
-{
-    writeln("[DEBUG_LOG] Testing availableAlgorithms function");
-    string[] algorithms = Stemmer.availableAlgorithms();
-
-    // Should have multiple algorithms
-    assert(algorithms.length > 10);
-
-    // Should contain common algorithms
-    bool hasEnglish = false;
-    bool hasFrench = false;
-    bool hasGerman = false;
-
-    foreach (algo; algorithms)
-    {
-        if (algo == "english")
-            hasEnglish = true;
-        if (algo == "french")
-            hasFrench = true;
-        if (algo == "german")
-            hasGerman = true;
+    foreach (testCase; englishTestData) {
+        assert(stemmer.stem(testCase.input) == testCase.expected);
     }
-
-    assert(hasEnglish);
-    assert(hasFrench);
-    assert(hasGerman);
-
-    writeln("[DEBUG_LOG] Available algorithms test passed, found ",
-            algorithms.length, " algorithms");
 }
 
-// Test error handling
-unittest
-{
-    writeln("[DEBUG_LOG] Testing error handling");
+unittest {
+    const multiLanguageData = [
+        LanguageTestData("french", [TestCase("cheval", "cheval"), TestCase("chevaux", "cheval")]),
+        LanguageTestData("german", [TestCase("laufen", "lauf")]),
+        LanguageTestData("spanish", [TestCase("correr", "corr")]),
+        LanguageTestData("porter", [TestCase("running", "run"), TestCase("flies", "fli"), TestCase("dogs", "dog")])
+    ];
+    foreach (langData; multiLanguageData) {
+        auto stemmer = Stemmer(langData.language);
+        foreach (testCase; langData.testCases) {
+            assert(stemmer.stem(testCase.input) == testCase.expected);
+        }
+    }
+}
 
-    // Test invalid algorithm
+unittest {
+    string[] algorithms = Stemmer.availableAlgorithms();
+    assert(algorithms.length > 10);
+    string[] requiredAlgorithms = ["english", "french", "german"];
+    foreach (required; requiredAlgorithms) {
+        bool found = false;
+        foreach (algo; algorithms) {
+            if (algo == required) {
+                found = true;
+                break;
+            }
+        }
+        assert(found);
+    }
+}
+
+unittest {
     assertThrown!Exception(Stemmer("invalid_algorithm"));
-
-    // Test valid stemmer with edge case inputs
+    const edgeCases = [
+        TestCase("", ""),
+        TestCase("a", "a"),
+        TestCase("i", "i"),
+        TestCase("be", "be")
+    ];
     auto stemmer = Stemmer("english");
-
-    // Empty string should return empty string
-    assert(stemmer.stem("") == "");
-
-    // Single character
-    assert(stemmer.stem("a") == "a");
-
-    // Very short words
-    assert(stemmer.stem("i") == "i");
-    assert(stemmer.stem("be") == "be");
-
-    writeln("[DEBUG_LOG] Error handling tests passed");
+    foreach (testCase; edgeCases) {
+        assert(stemmer.stem(testCase.input) == testCase.expected);
+    }
 }
 
-// Test character encoding support
-unittest
-{
-    writeln("[DEBUG_LOG] Testing character encoding support");
-
-    // Test UTF-8 (default)
+unittest {
+    const encodingTests = [TestCase("running", "run")];
     auto utf8Stemmer = Stemmer("english", "UTF-8");
-    assert(utf8Stemmer.stem("running") == "run");
-
-    // Test explicit UTF-8
-    auto utf8Stemmer2 = Stemmer("english");
-    assert(utf8Stemmer2.stem("running") == "run");
-
-    writeln("[DEBUG_LOG] Character encoding tests passed");
+    auto defaultStemmer = Stemmer("english");
+    foreach (testCase; encodingTests) {
+        assert(utf8Stemmer.stem(testCase.input) == testCase.expected);
+        assert(defaultStemmer.stem(testCase.input) == testCase.expected);
+    }
 }
 
-// Test stemmer with various word lengths and patterns
-unittest
-{
-    writeln("[DEBUG_LOG] Testing various word patterns");
+unittest {
     auto stemmer = Stemmer("english");
-
-    // Test words with different suffixes
-    assert(stemmer.stem("happiness") == "happi");
-    assert(stemmer.stem("happily") == "happili");
-    assert(stemmer.stem("unhappy") == "unhappi");
-
-    // Test plurals
-    assert(stemmer.stem("cats") == "cat");
-    assert(stemmer.stem("boxes") == "box");
-    assert(stemmer.stem("children") == "children"); // Irregular plural
-
-    // Test past tense
-    assert(stemmer.stem("walked") == "walk");
-    assert(stemmer.stem("ran") == "ran"); // Irregular past tense
-
-    // Test gerunds and present participles
-    assert(stemmer.stem("walking") == "walk");
-    assert(stemmer.stem("swimming") == "swim");
-
-    writeln("[DEBUG_LOG] Word pattern tests passed");
-}
-
-// Test case sensitivity
-unittest
-{
-    writeln("[DEBUG_LOG] Testing case sensitivity");
-    auto stemmer = Stemmer("english");
-
-    // Stemmer expects lowercase input for best results
     assert(stemmer.stem("running") == "run");
-    assert(stemmer.stem("RUNNING") != "run"); // Uppercase may not stem correctly
-
-    // Test mixed case
-    string mixedCase = "Running";
-    string lowerCase = "running";
-    // The library expects lowercase, so results may differ
-
-    writeln("[DEBUG_LOG] Case sensitivity tests passed");
+    assert(stemmer.stem("RUNNING") != "run");
 }
 
-// Test porter algorithm specifically
-unittest
-{
-    writeln("[DEBUG_LOG] Testing Porter algorithm");
-    auto porterStemmer = Stemmer("porter");
-
-    // Porter algorithm should work similar to English
-    assert(porterStemmer.stem("running") == "run");
-    assert(porterStemmer.stem("flies") == "fli");
-    assert(porterStemmer.stem("dogs") == "dog");
-
-    writeln("[DEBUG_LOG] Porter algorithm tests passed");
+unittest {
+    auto stemmer1 = Stemmer("english");
+    auto stemmer2 = Stemmer("french");
+    auto stemmer3 = Stemmer("german");
+    assert(stemmer1.stem("running") == "run");
+    assert(stemmer2.stem("chevaux") == "cheval");
+    assert(stemmer3.stem("laufen") == "lauf");
 }
 
-// Test resource management (RAII)
-unittest
-{
-    writeln("[DEBUG_LOG] Testing resource management");
-
-    // Test that multiple stemmers can be created and used
-    {
-        auto stemmer1 = Stemmer("english");
-        auto stemmer2 = Stemmer("french");
-        auto stemmer3 = Stemmer("german");
-
-        assert(stemmer1.stem("running") == "run");
-        assert(stemmer2.stem("chevaux") == "cheval");
-        assert(stemmer3.stem("laufen") == "lauf");
-    } // Stemmers should be automatically cleaned up here
-
-    writeln("[DEBUG_LOG] Resource management tests passed");
-}
-
-// Test long words and edge cases
-unittest
-{
-    writeln("[DEBUG_LOG] Testing long words and edge cases");
+unittest {
     auto stemmer = Stemmer("english");
-
-    // Test very long word
     string longWord = "antidisestablishmentarianism";
     string stemmedLong = stemmer.stem(longWord);
     assert(stemmedLong.length > 0);
     assert(stemmedLong.length <= longWord.length);
-
-    // Test word with numbers (though not typical use case)
-    assert(stemmer.stem("test123") == "test123");
-
-    // Test word with hyphens
-    assert(stemmer.stem("self-evident") == "self-evid");
-
-    writeln("[DEBUG_LOG] Long words and edge cases tests passed");
+    const specialCases = [
+        TestCase("test123", "test123"),
+        TestCase("self-evident", "self-evid")
+    ];
+    foreach (testCase; specialCases) {
+        assert(stemmer.stem(testCase.input) == testCase.expected);
+    }
 }

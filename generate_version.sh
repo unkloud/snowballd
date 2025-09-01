@@ -10,4 +10,4 @@ string libstemmerVersion() pure nothrow @safe
 }
 EOF
 
-sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" dub.json
+sed -i.bak "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" dub.json && rm -f dub.json.bak

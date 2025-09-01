@@ -25,6 +25,7 @@ main() {
     *) usage; die "unsupported libstemmer version '$version'; supported versions are 3.0.0 and 3.0.1" ;;
   esac
   local install_dir="${SCRIPT_DIR}/src"
+  mkdir -p "$install_dir"
 
   need_cmd tar
   local dl=""
